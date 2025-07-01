@@ -2,12 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { 
   TrendingUp, 
   CheckCircle, 
-  Clock, 
   Target,
   DollarSign,
   Shield,
@@ -19,18 +17,15 @@ import PlanoDeAcao from '@/components/PlanoDeAcao';
 import ChecklistDiario from '@/components/ChecklistDiario';
 import SimuladorCredito from '@/components/SimuladorCredito';
 import PainelProgresso from '@/components/PainelProgresso';
-import AuthModal from '@/components/AuthModal';
+import { useBusinessLogic } from '@/hooks/useBusinessLogic';
 
 const Index = () => {
-  const [user, setUser] = useState(null);
-  const [currentPhase, setCurrentPhase] = useState('welcome');
-  const [userProgress, setUserProgress] = useState({
-    scoreAtual: 0,
-    scoreSimulado: 0,
-    faseAtual: 'diagnostico',
-    progressoPlano: 0,
-    diasRestantes: 7
-  });
+  const {
+    currentPhase,
+    userProgress,
+    setCurrentPhase,
+    setUserProfile
+  } = useBusinessLogic();
 
   const phases = [
     { id: 'welcome', title: 'Bem-vindo', icon: Shield },
@@ -42,6 +37,11 @@ const Index = () => {
 
   const getCurrentPhaseIndex = () => {
     return phases.findIndex(phase => phase.id === currentPhase);
+  };
+
+  const handleDiagnosticoComplete = (profileData: any) => {
+    setUserProfile(profileData);
+    setCurrentPhase('plano');
   };
 
   const WelcomeScreen = () => (
@@ -179,7 +179,7 @@ const Index = () => {
           {/* Right Column - Current Phase Content */}
           <div className="lg:col-span-2">
             {currentPhase === 'diagnostico' && (
-              <FormDiagnostico onComplete={() => setCurrentPhase('plano')} />
+              <FormDiagnostico onComplete={handleDiagnosticoComplete} />
             )}
             {currentPhase === 'plano' && (
               <PlanoDeAcao onComplete={() => setCurrentPhase('checklist')} />
