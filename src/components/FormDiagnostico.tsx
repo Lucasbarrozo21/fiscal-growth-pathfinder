@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { Brain, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface FormDiagnosticoProps {
-  onComplete: () => void;
+  onComplete: (profileData: any) => void;
 }
 
 const FormDiagnostico = ({ onComplete }: FormDiagnosticoProps) => {
@@ -36,13 +35,22 @@ const FormDiagnostico = ({ onComplete }: FormDiagnosticoProps) => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
 
+    // Create profile data from form
+    const profileData = {
+      scoreAtual: parseInt(formData.scoreEstimado.split('-')[0]) || 300,
+      temDividas: formData.temDividas === 'sim',
+      rendaComprovada: formData.rendaMensal !== '',
+      relacionamentoBanco: formData.temContaBancaria === 'sim' ? 'existente' : 'novo',
+      movimentacaoMensal: parseInt(formData.rendaMensal) > 3000 ? 'alta' : 'media'
+    };
+
     toast({
       title: "Diagnóstico realizado com sucesso! 🎯",
       description: "Nossa IA analisou seu perfil e criou um plano personalizado.",
     });
 
     setLoading(false);
-    onComplete();
+    onComplete(profileData);
   };
 
   const handleInputChange = (field: string, value: string) => {
