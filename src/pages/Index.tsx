@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,21 +17,28 @@ import ChecklistDiario from '@/components/ChecklistDiario';
 import SimuladorCredito from '@/components/SimuladorCredito';
 import PainelProgresso from '@/components/PainelProgresso';
 import { useBusinessLogic } from '@/hooks/useBusinessLogic';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import ResumoJornada from '@/components/ResumoJornada';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const Index = () => {
   const {
     currentPhase,
     userProgress,
+    userProfile,
     setCurrentPhase,
     setUserProfile
   } = useBusinessLogic();
+
+  const { scheduleDailyReminder, scheduleScoreCheckReminder } = useNotifications();
 
   const phases = [
     { id: 'welcome', title: 'Bem-vindo', icon: Shield },
     { id: 'diagnostico', title: 'Diagnóstico', icon: Brain },
     { id: 'plano', title: 'Plano de Ação', icon: Target },
     { id: 'checklist', title: 'Checklist Diário', icon: CheckCircle },
-    { id: 'simulador', title: 'Simulador', icon: DollarSign }
+    { id: 'simulador', title: 'Simulador', icon: DollarSign },
+    { id: 'resumo', title: 'Resumo', icon: TrendingUp }
   ];
 
   const getCurrentPhaseIndex = () => {
@@ -42,6 +48,9 @@ const Index = () => {
   const handleDiagnosticoComplete = (profileData: any) => {
     setUserProfile(profileData);
     setCurrentPhase('plano');
+    // Agendar lembretes automáticos
+    scheduleDailyReminder();
+    scheduleScoreCheckReminder();
   };
 
   const WelcomeScreen = () => (
@@ -112,28 +121,31 @@ const Index = () => {
   );
 
   const MainDashboard = () => (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                 BoostCrédito AI™
               </h1>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              <Badge variant="outline" className="bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700">
                 Fase: {phases.find(p => p.id === currentPhase)?.title}
               </Badge>
             </div>
-            <Button variant="outline" size="sm">
-              Sair
-            </Button>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              <Button variant="outline" size="sm">
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Progress Timeline */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-gray-800 border-b">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             {phases.slice(1).map((phase, index) => {
@@ -147,18 +159,20 @@ const Index = () => {
                     flex items-center justify-center w-10 h-10 rounded-full border-2 
                     ${isActive ? 'bg-blue-600 border-blue-600 text-white' : 
                       isCompleted ? 'bg-green-600 border-green-600 text-white' : 
-                      'bg-gray-100 border-gray-300 text-gray-400'}
+                      'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500'}
                   `}>
                     <Icon className="h-5 w-5" />
                   </div>
                   <span className={`ml-2 text-sm font-medium ${
-                    isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-400'
+                    isActive ? 'text-blue-600 dark:text-blue-400' : 
+                    isCompleted ? 'text-green-600 dark:text-green-400' : 
+                    'text-gray-400 dark:text-gray-500'
                   }`}>
                     {phase.title}
                   </span>
                   {index < phases.slice(1).length - 1 && (
                     <div className={`h-0.5 w-16 mx-4 ${
-                      isCompleted ? 'bg-green-600' : 'bg-gray-200'
+                      isCompleted ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'
                     }`} />
                   )}
                 </div>
@@ -188,7 +202,10 @@ const Index = () => {
               <ChecklistDiario onComplete={() => setCurrentPhase('simulador')} />
             )}
             {currentPhase === 'simulador' && (
-              <SimuladorCredito />
+              <SimuladorCredito onComplete={() => setCurrentPhase('resumo')} />
+            )}
+            {currentPhase === 'resumo' && (
+              <ResumoJornada userProgress={userProgress} userProfile={userProfile} />
             )}
           </div>
         </div>
