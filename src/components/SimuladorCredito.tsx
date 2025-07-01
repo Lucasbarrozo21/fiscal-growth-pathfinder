@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,11 @@ import {
   Star
 } from 'lucide-react';
 
-const SimuladorCredito = () => {
+interface SimuladorCreditoProps {
+  onComplete: () => void;
+}
+
+const SimuladorCredito = ({ onComplete }: SimuladorCreditoProps) => {
   const [scoreSimulado, setScoreSimulado] = useState(0);
   const [statusSemaforo, setStatusSemaforo] = useState<'vermelho' | 'amarelo' | 'verde'>('vermelho');
   const [loading, setLoading] = useState(true);
@@ -288,9 +291,10 @@ const SimuladorCredito = () => {
             variant="secondary"
             size="lg"
             className="bg-white text-blue-600 hover:bg-gray-100"
+            onClick={onComplete}
           >
             <DollarSign className="mr-2 h-5 w-5" />
-            Baixar Relatório PDF
+            Finalizar Simulação
           </Button>
         </CardContent>
       </Card>
